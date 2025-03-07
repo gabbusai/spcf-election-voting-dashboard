@@ -17,6 +17,7 @@ import Users from './pages/Users.jsx'
 import ElectionsListPage from './pages/SubPages/ElectionsListPage.jsx'
 import ElectionDetailsPage from './pages/SubPages/ElectionDetailsPage.jsx'
 import ElectionsCreatePage from './pages/SubPages/ElectionsCreatePage.jsx'
+import CampaignPage from './pages/CampaignPage.jsx'
 const queryClient = new QueryClient({
   defaultOptions: {
       queries: {
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
       {path: '/elections/:id', element :<ElectionDetailsPage/> },
       {path: '/elections/create', element :<ElectionsCreatePage/> },
       { path: '/positions-candidates', element: <PositionsCandidates /> },
+      { path: '/campaign-posts', element: <CampaignPage />},
       { path: '/voters-management', element: <Voters /> },
       { path: '/departments-roles', element: <DepartmentsRoles /> },
       { path: '/users-management', element: <Users /> },

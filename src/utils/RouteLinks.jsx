@@ -7,6 +7,7 @@ export const links = [
         path: '/',
         icon: <TbLayoutDashboardFilled />
     },
+
     {
         title: 'Elections Management', 
         path: '/elections-management', 
@@ -14,6 +15,7 @@ export const links = [
             { name: 'View All Elections', path: '/elections/all' },
             { name: 'Create New Election', path: '/elections/create' },
             { name: 'Election Reports', path: '/elections/reports' }
+            
         ],
         icon: <FaChartBar />
     },
@@ -28,6 +30,16 @@ export const links = [
         ],
         icon: <FaUserTie />
     },
+
+    { 
+        title: 'Campaign And Posts', 
+        path: '/campaign-posts', 
+        subLinks: [
+            { name: 'Manage Posts', path: '/campaign-posts' },
+        ],
+        icon: <FaUserTie />
+    },
+
     { 
         title: 'Voter Management', 
         path: '/voters-management', 
@@ -39,6 +51,7 @@ export const links = [
         ] ,
         icon: <FaVoteYea />
     },
+
     { 
         title: 'Departments & Roles', 
         path: '/departments-roles', 

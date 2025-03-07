@@ -119,7 +119,7 @@
 
     export const getAllCandidates = async () => {
         try{
-            const response = await axiosInstance.get(`/api/candidates/all`);
+            const response = await axiosInstance.get(`/api/candidate/all`);
             console.log('reached function')
             return response.data;
         }catch{
@@ -131,6 +131,21 @@
     export const getAllPositions = async () => {
         try{
             const response = await axiosInstance.get(`/api/positions/all`,);
+            console.log('reached function')
+            return response.data;
+        }catch{
+            console.error("Error fetching candidates details", error);
+            throw error
+        }
+    }
+
+    export const getAllPartylists = async (token) => {
+        try{
+            const response = await axiosInstance.get(`/api/partylists/all`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
             console.log('reached function')
             return response.data;
         }catch{

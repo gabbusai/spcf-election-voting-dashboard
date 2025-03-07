@@ -10,7 +10,7 @@ function LoginPage() {
   const [formData, setFormData] = useState({
     student_id: '',
     email: '',
-    password: '',
+    tokenOTP: '',
   });
 
   const handleLogin = async (e) => {
@@ -65,7 +65,7 @@ function LoginPage() {
               id="password"
               name="password"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, tokenOTP: e.target.value })}
               className="mt-2 block w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Enter your password"
             />

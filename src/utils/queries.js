@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { getAllCandidates, getAllElections, getAllPositions, getAllRegistered, getDepartments, getElectionById } from "./api";
+import { getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartments, getElectionById } from "./api";
 
 
 export const useFetchDepartments = () => {
@@ -8,7 +8,6 @@ export const useFetchDepartments = () => {
         queryFn: () => getDepartments(),
     })
 }
-
 
 //elections
 export const useFetchElections = (token) => {
@@ -60,5 +59,12 @@ export const useFetchPositions = () => {
     return useQuery({
         queryKey: ['positions'],
         queryFn: () => getAllPositions(),
+    })
+}
+//party list
+export const useFetchPartyList = (token) => {
+    return useQuery({
+        queryKey: ['partyList'],
+        queryFn: () => getAllPartylists(token),
     })
 }
