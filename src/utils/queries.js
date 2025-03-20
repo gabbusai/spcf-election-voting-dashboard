@@ -1,5 +1,5 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartments, getElectionById } from "./api";
+import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
+import { fetchPaginatedPosts, getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartmentById, getDepartments, getDepartmentsList, getElectionById } from "./api";
 
 
 export const useFetchDepartments = () => {
@@ -66,5 +66,37 @@ export const useFetchPartyList = (token) => {
     return useQuery({
         queryKey: ['partyList'],
         queryFn: () => getAllPartylists(token),
+    })
+}
+
+
+//departments
+export const useFetchDepartmentsList = (token) => {
+    return useQuery({
+        queryKey: ['departmentsList'],
+        queryFn: () => getDepartmentsList(token),
+    })
+}
+export const useFetchDepartmenyById = (token, id) => {
+    return useQuery({
+        queryKey: ['departmentById'],
+        queryFn: () => getDepartmentById(token, id),
+    })
+}
+
+
+//get paginated posts
+export const useFetchPaginatedPosts = (token, perPage) => {
+    return useInfiniteQuery({
+        queryKey: ['paginatedPosts', perPage],
+        queryFn: ({pageParam = 1}) => fetchPaginatedPosts(token, pageParam, perPage),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) => {
+        // If there's a next page (based on last_page or next_page_url), return the next page number
+        if (lastPage.pagination.current_page < lastPage.pagination.last_page) {
+            return lastPage.pagination.current_page + 1;
+        }
+        return undefined; // No more pages to fetch
+        }
     })
 }

@@ -12,12 +12,13 @@ import Dashboard from './pages/Dashboard.jsx'
 import Elections from './pages/Elections.jsx'
 import PositionsCandidates from './pages/PositionsCandidates.jsx'
 import Voters from './pages/Voters.jsx'
-import DepartmentsRoles from './pages/DepartmentsRoles.jsx'
+import DepartmentsRoles from './pages/Departments/DepartmentsRoles.jsx'
 import Users from './pages/Users.jsx'
 import ElectionsListPage from './pages/SubPages/ElectionsListPage.jsx'
 import ElectionDetailsPage from './pages/SubPages/ElectionDetailsPage.jsx'
 import ElectionsCreatePage from './pages/SubPages/ElectionsCreatePage.jsx'
 import CampaignPage from './pages/CampaignPage.jsx'
+import DepartmentsId from './pages/Departments/DepartmentsId.jsx'
 const queryClient = new QueryClient({
   defaultOptions: {
       queries: {
@@ -36,14 +37,20 @@ const router = createBrowserRouter([
     {element: <MainLayout />, // Use MainLayout as the wrapper for your routes
     children: [
       { path: '/', element: <Dashboard /> },
+
       { path: '/elections-management', element: <Elections /> },
       {path: '/elections/all', element :<ElectionsListPage/> },
       {path: '/elections/:id', element :<ElectionDetailsPage/> },
       {path: '/elections/create', element :<ElectionsCreatePage/> },
+
       { path: '/positions-candidates', element: <PositionsCandidates /> },
+
       { path: '/campaign-posts', element: <CampaignPage />},
       { path: '/voters-management', element: <Voters /> },
+
       { path: '/departments-roles', element: <DepartmentsRoles /> },
+      { path: '/departments/:id', element: <DepartmentsId /> },
+      
       { path: '/users-management', element: <Users /> },
 
       { path: '/logout', element: <Logout /> },
