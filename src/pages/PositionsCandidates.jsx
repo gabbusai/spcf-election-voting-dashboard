@@ -6,6 +6,7 @@ import CandidateForm from './SubPages/CandidateForm';
 import PartylistForm from './SubPages/PartylistForm';
 import { useAuthContext } from '../utils/AuthContext';
 import axios from 'axios';
+import PartyListTable from './SubPages/PartyListTable';
 
 const PositionsCandidates = () => {
   const [isPositionModalOpen, setIsPositionModalOpen] = useState(false);
@@ -85,6 +86,26 @@ const PositionsCandidates = () => {
           refetchCandidates();
         } catch (error) {
           message.error(error.response?.data?.message || 'Failed to remove candidate');
+        }
+      },
+    });
+  };
+
+  const handleDeletePartylist = async (partylistId) => {
+    Modal.confirm({
+      title: 'Are you sure you want to delete this party list?',
+      content: 'This will remove the party list and set all its candidates to Independent.',
+      async onOk() {
+        try {
+          const config = {
+            headers: { 'Authorization': `Bearer ${token}` },
+          }; 
+          await axios.delete(`/api/admin/partylist/${partylistId}`, config);
+          message.success('Party list deleted successfully');
+          refetchPartyLists();
+          refetchCandidates();
+        } catch (error) {
+          message.error(error.response?.data?.message || 'Failed to delete party list');
         }
       },
     });
@@ -267,6 +288,14 @@ const PositionsCandidates = () => {
           </Button>
         </div>
       </div>
+
+      {/* Party Lists Table */}
+      <PartyListTable
+        partylists={partylists}
+        loading={partylistsLoading}
+        onEdit={openPartylistModal}
+        onDelete={handleDeletePartylist}
+      />
 
       {/* Positions Table */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">

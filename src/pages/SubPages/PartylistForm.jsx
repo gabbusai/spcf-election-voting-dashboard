@@ -34,7 +34,7 @@ const PartylistForm = ({ onClose, onRefresh, partylist = null }) => {
       };
 
       if (partylist) {
-        await axios.put(`/api/partylist-make/${partylist.id}`, values, config);
+        await axios.put(`/api/admin/partylist/${partylist.id}`, values, config);
         message.success('Party list updated successfully');
       } else {
         await axios.post('/api/partylist-make', values, config);
