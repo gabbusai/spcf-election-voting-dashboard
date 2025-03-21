@@ -234,5 +234,62 @@ export const fetchPaginatedPosts = async (token, page, perPage = 2) => {
     return response.data;
   };
 
+
+//get paginated users
+export const fetchPaginatedUsers = async (token, search = "",page, perPage = 15) => {
+    if (page < 1) {
+        page = 1;
+    }
+    const response = await axiosInstance.get(`/api/admin/students/all?search=${search}&page=${page}&per_page=${perPage}`,{
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+    return response.data;
+}
+
+//make student 
+export const useMakeStudent = async (token, formData) => {
+        try {
+            const response = await axiosInstance.post('/api/admin/students/make', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error logging out", error);
+            throw error.response ? error.response.data : error;
+        }
+};
+
+export const useEditStudent = async (token, formData, id) => {
+    try {
+        const response = await axiosInstance.put(`/api/admin/students/${id}`, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error logging out", error);
+        throw error.response ? error.response.data : error;
+    }
+}
+
+export const useDeleteStudent = async (token, id) => {
+    try {
+        const response = await axiosInstance.delete(`/api/admin/students/${id}`, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error logging out", error);
+        throw error.response ? error.response.data : error;
+    }
+}
+
 //register -> provide student_id, name, department, email, contact, -> unique id
 

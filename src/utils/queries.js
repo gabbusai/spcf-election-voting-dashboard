@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
-import { fetchPaginatedPosts, getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartmentById, getDepartments, getDepartmentsList, getElectionById } from "./api";
+import { fetchPaginatedPosts, fetchPaginatedUsers, getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartmentById, getDepartments, getDepartmentsList, getElectionById } from "./api";
 
 
 export const useFetchDepartments = () => {
@@ -97,6 +97,21 @@ export const useFetchPaginatedPosts = (token, perPage) => {
             return lastPage.pagination.current_page + 1;
         }
         return undefined; // No more pages to fetch
+        }
+    })
+}
+
+//get paginated users with search
+export const useFetchStudents = (token, perPage, search) => {
+    return useInfiniteQuery({
+        queryKey: ['students', perPage, search],
+        queryFn: ({pageParam = 1}) => fetchPaginatedUsers(token, search, pageParam, perPage),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) => {
+            if(lastPage.pagination.current_page < lastPage.pagination.last_page){
+                return lastPage.pagination.current_page + 1;
+            }
+            return undefined;
         }
     })
 }
