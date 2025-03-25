@@ -277,6 +277,27 @@ export const useEditStudent = async (token, formData, id) => {
         throw error.response ? error.response.data : error;
     }
 }
+// import csv students
+export const importStudentCSV = async (file, token) => {
+    try {
+        // Create FormData object to hold the CSV file
+        const formData = new FormData();
+        formData.append('file', file); // 'file' matches the Laravel controller's expected key
+
+        const response = await axiosInstance.post('/api/admin/students/import', formData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data', // Required for file uploads
+                'Accept': 'application/json', // Ensure JSON response
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error importing students:', error.response?.data || error);
+        throw error.response ? error.response.data : error;
+    }
+};
 
 //unused
 export const useDeleteStudent = async (token, id) => {

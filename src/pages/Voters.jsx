@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useFetchStudents } from '../utils/queries';
 import { useAuthContext } from '../utils/AuthContext';
-import { Table, Button, Input, Spin, Modal, message } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Table, Button, Input, Spin, Modal, message, Upload } from 'antd';
+import { SearchOutlined, UploadOutlined } from '@ant-design/icons';
 import EditStudentModal from './Students/EditStudentModal'; 
 import GenerateTokenModal from './Students/GenerateTokenModal'; 
 import axios from 'axios';
+import { importStudentCSV } from '../utils/api';
 
 function Voters() {
   const { token } = useAuthContext();
@@ -13,6 +14,7 @@ function Voters() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [generateModalVisible, setGenerateModalVisible] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const {
     data,
@@ -76,6 +78,30 @@ function Voters() {
     });
   };
 
+  // Handle CSV upload
+  const handleUpload = async (file) => {
+    setUploading(true);
+    try {
+      const response = await importStudentCSV(file, token);
+      message.success(`Imported ${response.count} students successfully`);
+      refetch(); // Refresh the student list
+    } catch (error) {
+      message.error(error.message || 'Failed to import students');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Upload props for Ant Design Upload component
+  const uploadProps = {
+    accept: '.csv',
+    showUploadList: false,
+    beforeUpload: (file) => {
+      handleUpload(file);
+      return false; // Prevent automatic upload by Upload component
+    },
+  };
+
   if (isLoading && !data) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -104,7 +130,6 @@ function Voters() {
       key: 'name',
       render: (text) => <span className="font-medium">{text}</span>,
     },
-    { title: 'Year', dataIndex: 'year', key: 'year' },
     { 
       title: 'Department ID', 
       dataIndex: 'department_id', 
@@ -172,13 +197,24 @@ function Voters() {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Voters</h1>
-        <Input.Search
-          placeholder="Search by name or ID"
-          onSearch={handleSearch}
-          enterButton={<Button type="primary" icon={<SearchOutlined />} />}
-          className="w-64"
-          allowClear
-        />
+        <div className="flex space-x-4 items-center">
+          <Upload {...uploadProps}>
+            <Button
+              icon={<UploadOutlined />}
+              className="bg-blue-600 hover:bg-blue-700 text-white border-none"
+              loading={uploading}
+            >
+              {uploading ? 'Uploading...' : 'Import Students CSV'}
+            </Button>
+          </Upload>
+          <Input.Search
+            placeholder="Search by name or ID"
+            onSearch={handleSearch}
+            enterButton={<Button type="primary" icon={<SearchOutlined />} />}
+            className="w-64"
+            allowClear
+          />
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
