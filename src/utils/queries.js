@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
-import { fetchPaginatedPosts, fetchPaginatedUsers, getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartmentById, getDepartments, getDepartmentsList, getElectionById } from "./api";
+import { fetchPaginatedPosts, fetchPaginatedTurnouts, fetchPaginatedUsers, getAdminElectionResults, getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartmentById, getDepartments, getDepartmentsList, getElectionById } from "./api";
 
 
 export const useFetchDepartments = () => {
@@ -113,5 +113,28 @@ export const useFetchStudents = (token, perPage, search) => {
             }
             return undefined;
         }
+    })
+}
+
+//get paginated users with search
+export const useFetchTurnouts = (token, id, perPage, search) => {
+    return useInfiniteQuery({
+        queryKey: ['turnouts', perPage, search],
+        queryFn: ({pageParam = 1}) => fetchPaginatedTurnouts(token, id, search, pageParam, perPage),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) => {
+            if(lastPage.pagination.current_page < lastPage.pagination.last_page){
+                return lastPage.pagination.current_page + 1;
+            }
+            return undefined;
+        }
+    })
+}
+
+//get election results 
+export const useFetchElectionResults = (token, id) => {
+    return useQuery({
+        queryKey: ['electionResults', id],
+        queryFn: () => getAdminElectionResults(token, id),
     })
 }

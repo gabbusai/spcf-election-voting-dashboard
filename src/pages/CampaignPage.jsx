@@ -16,6 +16,7 @@ function CampaignPage() {
     isError,
     error,
   } = useFetchPaginatedPosts(token, 3); // 3 posts per page as per your sample
+  console.log(data)
 
   // Infinite scroll effect
   useEffect(() => {

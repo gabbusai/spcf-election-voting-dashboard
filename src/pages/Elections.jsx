@@ -36,7 +36,7 @@ function Elections() {
 
           {/* Election Reports */}
           <Link
-            to="/elections/reports"
+            to="/elections/reports-list"
             className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition transform hover:scale-105"
           >
             <div className="flex items-center mb-4">

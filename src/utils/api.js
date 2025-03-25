@@ -263,6 +263,7 @@ export const useMakeStudent = async (token, formData) => {
         }
 };
 
+//unused
 export const useEditStudent = async (token, formData, id) => {
     try {
         const response = await axiosInstance.put(`/api/admin/students/${id}`, formData, {
@@ -277,6 +278,7 @@ export const useEditStudent = async (token, formData, id) => {
     }
 }
 
+//unused
 export const useDeleteStudent = async (token, id) => {
     try {
         const response = await axiosInstance.delete(`/api/admin/students/${id}`, formData, {
@@ -293,3 +295,32 @@ export const useDeleteStudent = async (token, id) => {
 
 //register -> provide student_id, name, department, email, contact, -> unique id
 
+
+export const getAdminElectionResults = async(token, id) => {
+    try{
+        const response = await axiosInstance.get(`/api/admin/elections/${id}/results`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        return response.data;
+    }
+    catch (error){
+        console.error("Error logging out", error);
+        throw error.response ? error.response.data : error;
+    }
+}
+
+//paginated turnouts 
+export const fetchPaginatedTurnouts = async (token, id,  search = "",page, perPage = 15) => {
+    console.log('reached turnout')
+    if (page < 1) {
+        page = 1;
+    }
+    const response = await axiosInstance.get(`/api/admin/elections/${id}/turnout?search=${search}&page=${page}&per_page=${perPage}`,{
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+    return response.data;
+}
