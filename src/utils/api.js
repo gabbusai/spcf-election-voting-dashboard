@@ -345,3 +345,20 @@ export const fetchPaginatedTurnouts = async (token, id,  search = "",page, perPa
     });
     return response.data;
 }
+
+
+export const fetchCountAllDepartments = async (token) => {
+    try { 
+        const response = await axiosInstance.get(`/api/admin/count/departments`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        return response.data.data;
+    }
+    catch (error){
+        console.error("Error logging out", error);
+        throw error.response ? error.response.data : error;
+        }
+
+}

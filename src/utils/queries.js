@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
-import { fetchPaginatedPosts, fetchPaginatedTurnouts, fetchPaginatedUsers, getAdminElectionResults, getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartmentById, getDepartments, getDepartmentsList, getElectionById } from "./api";
+import { fetchCountAllDepartments, fetchPaginatedPosts, fetchPaginatedTurnouts, fetchPaginatedUsers, getAdminElectionResults, getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartmentById, getDepartments, getDepartmentsList, getElectionById } from "./api";
 
 
 export const useFetchDepartments = () => {
@@ -42,6 +42,10 @@ export const useFetchDashboard = (token) => {
             {
                 queryKey: ['registeredData'],
                 queryFn: () => getAllRegistered(token),
+            },
+            {
+                queryKey: ['studentsCount'],
+                queryFn: () => fetchCountAllDepartments(token),
             }
         ]
     })

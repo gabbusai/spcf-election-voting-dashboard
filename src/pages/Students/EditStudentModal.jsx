@@ -32,7 +32,6 @@ const EditStudentModal = ({ visible, student, onClose, token, onRefresh }) => {
         onFinish={handleSubmit}
         initialValues={{
           name: student?.name,
-          year: student?.year,
           department_id: student?.department_id,
         }}
       >
@@ -45,17 +44,6 @@ const EditStudentModal = ({ visible, student, onClose, token, onRefresh }) => {
           ]}
         >
           <Input placeholder="Enter student name" className="rounded-md" />
-        </Form.Item>
-
-        <Form.Item
-          label="Year"
-          name="year"
-          rules={[
-            { required: true, message: 'Please enter the year!' },
-            { type: 'number', min: 1, max: 5, message: 'Year must be between 1 and 5!' },
-          ]}
-        >
-          <InputNumber min={1} max={5} className="w-full rounded-md" />
         </Form.Item>
 
         <Form.Item
