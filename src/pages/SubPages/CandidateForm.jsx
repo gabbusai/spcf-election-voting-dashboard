@@ -84,7 +84,7 @@ const CandidateForm = ({ onClose, onRefresh, candidate = null }) => {
       };
 
       if (candidate) {
-        await axios.put('/api/file-candidate', values, config);
+        await axios.put('/api/edit-candidate', values, config);
         message.success('Candidate updated successfully');
       } else {
         await axios.post('/api/file-candidate', values, config);

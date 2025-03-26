@@ -22,6 +22,7 @@ import DepartmentsId from './pages/Departments/DepartmentsId.jsx'
 import ElectionsReport from './pages/Elections/ElectionsReport.jsx'
 import ElectionsResultsId from './pages/Elections/ElectionsResultsId.jsx'
 import ElectionsReportsList from './pages/Elections/ElectinReportsList.jsx'
+import Feedbacks from './pages/Feedbacks/Feedbacks.jsx'
 const queryClient = new QueryClient({
   defaultOptions: {
       queries: {
@@ -57,7 +58,7 @@ const router = createBrowserRouter([
       { path: '/departments-roles', element: <DepartmentsRoles /> },
       { path: '/departments/:id', element: <DepartmentsId /> },
       
-      { path: '/users-management', element: <Users /> },
+      { path: '/feedbacks', element: <Feedbacks /> },
 
       { path: '/logout', element: <Logout /> },
       { path: '/register', element: <Logout /> },

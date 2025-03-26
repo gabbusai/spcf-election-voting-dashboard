@@ -362,3 +362,17 @@ export const fetchCountAllDepartments = async (token) => {
         }
 
 }
+
+//paginated turnouts 
+export const fetchPaginatedFeedbacks = async (token, id,  search = "",page, perPage = 15) => {
+    console.log('reached turnout')
+    if (page < 1) {
+        page = 1;
+    }
+    const response = await axiosInstance.get(`/api/admin/feedbacks/all?search=${search}&page=${page}&per_page=${perPage}`,{
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+    return response.data;
+}
