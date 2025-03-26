@@ -5,7 +5,12 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        title:['"Climate Crisis"', 'sans-serif'],
+        bebasNeue:['"Bebas Neue"', 'sans-serif']
+      }
+    },
   },
   plugins: [],
 }
