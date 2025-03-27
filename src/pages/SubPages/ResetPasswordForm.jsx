@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import axios from 'axios';
 import { useAuthContext } from '../../utils/AuthContext';
+import { ENV_BASE_URL } from '../../../DummyENV';
 
 const ResetPasswordForm = ({ onClose }) => {
   const [form] = Form.useForm();
@@ -19,7 +20,7 @@ const ResetPasswordForm = ({ onClose }) => {
       };
       // Only send new_password
       const payload = { new_password: values.new_password };
-      const response = await axios.post('/api/admin/reset-password', payload, config);
+      const response = await axios.post(`${ENV_BASE_URL}/api/admin/reset-password`, payload, config);
       message.success(response.data.message);
       form.resetFields();
       onClose();
