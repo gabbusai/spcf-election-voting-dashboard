@@ -1,7 +1,10 @@
 import axios from "axios";
+import { ENV_BASE_URL } from "../../DummyENV";
 
 // Base URL configuration
-export const BASE_URL = "http://ec2-34-224-173-63.compute-1.amazonaws.com";
+export const BASE_URL = ENV_BASE_URL;
+
+//"http://ec2-34-224-173-63.compute-1.amazonaws.com";
 
 // Create Axios instance with custom configuration
 export const axiosInstance = axios.create({

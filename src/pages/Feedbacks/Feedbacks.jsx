@@ -100,6 +100,7 @@ function Feedbacks() {
 
               {/* Content */}
               <p style={{ margin: 0, color: '#555' }}>{feedback.content}</p>
+              <p className="text-sm mt-5">by {feedback.user.name}</p>
             </li>
           ))}
         </ul>

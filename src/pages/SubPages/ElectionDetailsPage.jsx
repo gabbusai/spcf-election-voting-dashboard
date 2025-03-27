@@ -10,7 +10,8 @@ import {
   User, 
   CheckCircle, 
   XCircle, 
-  RefreshCw 
+  RefreshCw,
+  Edit // New icon for edit button
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ENV_BASE_URL } from '../../../DummyENV';
@@ -20,6 +21,8 @@ function ElectionDetailsPage() {
   const { id } = useParams();
   const { data: election, isLoading, isError, refetch } = useFetchElectionById(token, id);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
+  const [formData, setFormData] = useState({}); // State for form inputs
 
   // Handle status update with loading state
   const handleStatusChange = async (newStatus) => {
@@ -30,7 +33,7 @@ function ElectionDetailsPage() {
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      await refetch(); // Refresh election data
+      await refetch();
       toast.success(response.data.message);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update election status');
@@ -46,7 +49,45 @@ function ElectionDetailsPage() {
     handleStatusChange(newStatus);
   };
 
-  // Render loading and error states
+  // Open modal with current election data
+  const openEditModal = () => {
+    setFormData({
+      election_name: election.election.election_name,
+      campaign_start_date: election.election.campaign_start_date,
+      campaign_end_date: election.election.campaign_end_date,
+      election_start_date: election.election.election_start_date,
+      election_end_date: election.election.election_end_date,
+      status: election.election.status,
+    });
+    setIsModalOpen(true);
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Submit edited election data
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setIsUpdating(true);
+    try {
+      const response = await axios.put(
+        `${ENV_BASE_URL}/api/admin/election/edit`,
+        { election_id: id, ...formData },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await refetch(); // Refresh election data
+      toast.success(response.data.message);
+      setIsModalOpen(false); // Close modal on success
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update election');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -69,7 +110,6 @@ function ElectionDetailsPage() {
   const canStart = election.election.status === 'upcoming';
   const canEnd = election.election.status === 'ongoing';
 
-  // Status color mapping
   const statusColors = {
     'upcoming': 'bg-blue-100 text-blue-800',
     'ongoing': 'bg-green-100 text-green-800',
@@ -88,7 +128,7 @@ function ElectionDetailsPage() {
             </div>
           </div>
 
-          {/* Status Change Buttons (Admin Only) */}
+          {/* Buttons (Admin Only) */}
           {isAdmin && (
             <div className="flex space-x-3">
               {canStart && (
@@ -119,11 +159,19 @@ function ElectionDetailsPage() {
                 <RefreshCw className="w-5 h-5" />
                 <span>Toggle Status</span>
               </button>
+              <button
+                onClick={openEditModal}
+                disabled={isUpdating}
+                className="btn btn-info flex items-center space-x-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition"
+              >
+                <Edit className="w-5 h-5" />
+                <span>Edit Election</span>
+              </button>
             </div>
           )}
         </div>
 
-        {/* Election Details Grid */}
+        {/* Rest of the page remains unchanged */}
         <div className="grid md:grid-cols-2 gap-6">
           {/* Election Timeline */}
           <div className="bg-white shadow-lg rounded-lg p-6">
@@ -147,7 +195,6 @@ function ElectionDetailsPage() {
               ))}
             </div>
           </div>
-
           {/* Additional Election Info */}
           <div className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
@@ -166,29 +213,27 @@ function ElectionDetailsPage() {
                 <span className="text-gray-600">Last Updated</span>
                 <span className="font-medium">{new Date(election.election.updated_at).toLocaleString()}</span>
               </div>
-
-                {
-                    election.election.status === 'ongoing' &&
-                <Link className='btn btn-primary flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition'
-                to={`/elections/results/${election.election.id}`}>
-                See Results
+              {election.election.status === 'ongoing' && (
+                <Link
+                  className="btn btn-primary flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition"
+                  to={`/elections/results/${election.election.id}`}
+                >
+                  See Results
                 </Link>
-                }
-                {
-                    election.election.status === 'completed' &&
-                <Link className='btn btn-primary flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition'
-                to={`/elections/results/${election.election.id}`}>
-                See Results
+              )}
+              {election.election.status === 'completed' && (
+                <Link
+                  className="btn btn-primary flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition"
+                  to={`/elections/results/${election.election.id}`}
+                >
+                  See Results
                 </Link>
-                }
-                
+              )}
             </div>
           </div>
         </div>
-
         {/* Positions and Candidates */}
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Positions */}
           <div className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
               <Users className="mr-2 text-purple-500" /> Positions
@@ -205,8 +250,6 @@ function ElectionDetailsPage() {
               ))}
             </ul>
           </div>
-
-          {/* Candidates */}
           <div className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
               <Users className="mr-2 text-indigo-500" /> Candidates
@@ -235,6 +278,97 @@ function ElectionDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Election Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Edit Election</h2>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Election Name</label>
+                <input
+                  type="text"
+                  name="election_name"
+                  value={formData.election_name || ''}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Campaign Start Date</label>
+                <input
+                  type="datetime-local"
+                  name="campaign_start_date"
+                  value={formData.campaign_start_date ? new Date(formData.campaign_start_date).toISOString().slice(0, 16) : ''}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Campaign End Date</label>
+                <input
+                  type="datetime-local"
+                  name="campaign_end_date"
+                  value={formData.campaign_end_date ? new Date(formData.campaign_end_date).toISOString().slice(0, 16) : ''}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Election Start Date</label>
+                <input
+                  type="datetime-local"
+                  name="election_start_date"
+                  value={formData.election_start_date ? new Date(formData.election_start_date).toISOString().slice(0, 16) : ''}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Election End Date</label>
+                <input
+                  type="datetime-local"
+                  name="election_end_date"
+                  value={formData.election_end_date ? new Date(formData.election_end_date).toISOString().slice(0, 16) : ''}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Status</label>
+                <select
+                  name="status"
+                  value={formData.status || ''}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="ongoing">Ongoing</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition disabled:bg-blue-300"
+                >
+                  {isUpdating ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

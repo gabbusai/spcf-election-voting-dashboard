@@ -15,7 +15,7 @@ function CampaignPage() {
     isLoading,
     isError,
     error,
-  } = useFetchPaginatedPosts(token, 3); // 3 posts per page as per your sample
+  } = useFetchPaginatedPosts(token, 3); // 3 posts per page
 
   // Infinite scroll effect
   useEffect(() => {
@@ -50,26 +50,27 @@ function CampaignPage() {
     );
   }
 
-  // Handle Approve/Decline actions
+  // Handle Approve action
   const handleApprove = async (postId) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       await axios.put(`${ENV_BASE_URL}/api/admin/posts/${postId}/approve`, {}, config);
       message.success('Post approved successfully');
-      fetchNextPage();
+      fetchNextPage(); // Refresh data
     } catch (err) {
       message.error(err.response?.data?.message || 'Failed to approve post');
     }
   };
 
-  const handleDecline = async (postId) => {
+  // Handle Delete action
+  const handleDelete = async (postId) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`${ENV_BASE_URL}/api/posts/${postId}/decline`, {}, config);
-      message.success('Post declined successfully');
-      fetchNextPage();
+      await axios.delete(`${ENV_BASE_URL}/api/admin/posts/${postId}`, config);
+      message.success('Post deleted successfully');
+      fetchNextPage(); // Refresh data
     } catch (err) {
-      message.error(err.response?.data?.message || 'Failed to decline post');
+      message.error(err.response?.data?.message || 'Failed to delete post');
     }
   };
 
@@ -95,13 +96,13 @@ function CampaignPage() {
           <p className="text-sm text-gray-500">Review and moderate candidate campaign posts</p>
         </div>
         
-        <div className="divide-y divide-gray-100">
+        <div className="space-y-6 p-6"> {/* Added space-y-6 for vertical spacing */}
           {data?.pages.map((page, pageIndex) => (
             <div key={pageIndex}>
               {page.posts.map((post) => (
                 <div
                   key={post.id}
-                  className="p-6 hover:bg-gray-50 transition-colors"
+                  className="p-6 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex flex-col md:flex-row md:items-start gap-6">
                     {post.image && (
@@ -156,8 +157,8 @@ function CampaignPage() {
                         </div>
                       </div>
                       
-                      {!post.is_approved && (
-                        <div className="flex justify-end space-x-3">
+                      <div className="flex justify-end space-x-3">
+                        {!post.is_approved && (
                           <Button
                             type="primary"
                             className="bg-green-600 hover:bg-green-700 border-none shadow-sm"
@@ -166,16 +167,16 @@ function CampaignPage() {
                           >
                             Approve
                           </Button>
-                          <Button
-                            danger
-                            className="shadow-sm"
-                            onClick={() => handleDecline(post.id)}
-                            disabled={isFetchingNextPage}
-                          >
-                            Decline
-                          </Button>
-                        </div>
-                      )}
+                        )}
+                        <Button
+                          danger
+                          className="shadow-sm"
+                          onClick={() => handleDelete(post.id)}
+                          disabled={isFetchingNextPage}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
