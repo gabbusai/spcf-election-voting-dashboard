@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Base URL configuration
-export const BASE_URL = "http://127.0.0.1:8000/";
+export const BASE_URL = "http://ec2-34-224-173-63.compute-1.amazonaws.com";
 
 // Create Axios instance with custom configuration
 export const axiosInstance = axios.create({
