@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, message } from 'antd';
 import axios from 'axios';
 import { useFetchDepartments } from '../../utils/queries';
-
+import { ENV_BASE_URL } from '../../../DummyENV';
 const { Option } = Select;
 
 const PositionForm = ({ position, onClose, onRefresh, token }) => {
@@ -43,14 +43,13 @@ const PositionForm = ({ position, onClose, onRefresh, token }) => {
       if (values.is_general === 0 && values.department_id) {
         submitValues.department_id = values.department_id;
       }
-
       if (position) {
         // Use PUT request with position ID for updates
-        await axios.put(`/api/positions/${position.id}`, submitValues, config);
+        await axios.put(`${ENV_BASE_URL}/api/positions/${position.id}`, submitValues, config);
         message.success('Position updated successfully!');
       } else {
         // Use POST request for creating new positions
-        await axios.post('/api/positions-make', submitValues, config);
+        await axios.post(`${ENV_BASE_URL}/api/positions-make`, submitValues, config);
         message.success('Position added successfully!');
       }
       onRefresh();

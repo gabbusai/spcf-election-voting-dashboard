@@ -13,6 +13,7 @@ import {
   RefreshCw 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { ENV_BASE_URL } from '../../../DummyENV';
 
 function ElectionDetailsPage() {
   const { user, token } = useAuthContext();
@@ -25,7 +26,7 @@ function ElectionDetailsPage() {
     setIsUpdating(true);
     try {
       const response = await axios.put(
-        `/api/admin/elections/${id}/status`,
+        `${ENV_BASE_URL}/api/admin/elections/${id}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );

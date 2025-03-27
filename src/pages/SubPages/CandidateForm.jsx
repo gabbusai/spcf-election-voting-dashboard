@@ -3,6 +3,7 @@ import { Form, Input, Select, Button, message } from 'antd';
 import axios from 'axios';
 import { useFetchElections, useFetchPartyList, useFetchPositions } from '../../utils/queries';
 import { useAuthContext } from '../../utils/AuthContext';
+import { ENV_BASE_URL } from '../../../DummyENV';
 
 const { Option } = Select;
 
@@ -84,10 +85,10 @@ const CandidateForm = ({ onClose, onRefresh, candidate = null }) => {
       };
 
       if (candidate) {
-        await axios.put('/api/edit-candidate', values, config);
+        await axios.put(`${ENV_BASE_URL}/api/edit-candidate`, values, config);
         message.success('Candidate updated successfully');
       } else {
-        await axios.post('/api/file-candidate', values, config);
+        await axios.post(`${ENV_BASE_URL}/api/file-candidate`, values, config);
         message.success('Candidacy filed successfully');
       }
       onRefresh();

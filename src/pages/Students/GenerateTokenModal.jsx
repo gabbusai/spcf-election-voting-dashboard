@@ -1,13 +1,14 @@
 import React from 'react';
 import { Modal, Button, message } from 'antd';
 import axios from 'axios';
+import { ENV_BASE_URL } from '../../../DummyENV';
 
 const GenerateTokenModal = ({ visible, student, onClose, token, onRefresh }) => {
   const handleGenerate = async () => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       const response = await axios.post(
-        '/api/admin/token/generate',
+        `${ENV_BASE_URL}/api/admin/token/generate`,
         { student_ids: [student.id] },
         config
       );

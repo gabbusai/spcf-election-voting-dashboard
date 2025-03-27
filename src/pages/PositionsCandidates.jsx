@@ -7,6 +7,7 @@ import PartylistForm from './SubPages/PartylistForm';
 import { useAuthContext } from '../utils/AuthContext';
 import axios from 'axios';
 import PartyListTable from './SubPages/PartyListTable';
+import { ENV_BASE_URL } from '../../DummyENV';
 
 const PositionsCandidates = () => {
   const [isPositionModalOpen, setIsPositionModalOpen] = useState(false);
@@ -62,7 +63,7 @@ const PositionsCandidates = () => {
           const config = {
             headers: { 'Authorization': `Bearer ${token}` },
           };
-          await axios.delete(`/api/positions-delete/${positionId}`, config);
+          await axios.delete(`${ENV_BASE_URL}/api/positions-delete/${positionId}`, config);
           message.success('Position deleted successfully');
           refetchPositions();
         } catch (error) {
@@ -81,7 +82,7 @@ const PositionsCandidates = () => {
           const config = {
             headers: { 'Authorization': `Bearer ${token}` },
           };
-          await axios.delete(`/api/admin/remove-candidate/${candidateId}`, config);
+          await axios.delete(`${ENV_BASE_URL}/api/admin/remove-candidate/${candidateId}`, config);
           message.success('Candidate removed successfully');
           refetchCandidates();
         } catch (error) {
@@ -100,7 +101,7 @@ const PositionsCandidates = () => {
           const config = {
             headers: { 'Authorization': `Bearer ${token}` },
           }; 
-          await axios.delete(`/api/admin/partylist/${partylistId}`, config);
+          await axios.delete(`${ENV_BASE_URL}/api/admin/partylist/${partylistId}`, config);
           message.success('Party list deleted successfully');
           refetchPartyLists();
           refetchCandidates();

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, Form, Input, InputNumber, Button, message } from 'antd';
 import axios from 'axios';
+import { BASE_URL } from '../../utils/api';
 
 const EditStudentModal = ({ visible, student, onClose, token, onRefresh }) => {
   const [form] = Form.useForm();
@@ -8,7 +9,7 @@ const EditStudentModal = ({ visible, student, onClose, token, onRefresh }) => {
   const handleSubmit = async (values) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`/api/admin/students/${student.id}`, values, config);
+      await axios.put(`${BASE_URL}/api/admin/students/${student.id}`, values, config);
       message.success('Student updated successfully');
       form.resetFields();
       onClose();

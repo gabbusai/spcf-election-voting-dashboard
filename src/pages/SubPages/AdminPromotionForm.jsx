@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import axios from 'axios';
 import { useAuthContext } from '../../utils/AuthContext';
+import { ENV_BASE_URL } from '../../../DummyENV';
 
 const AdminPromotionForm = ({ onRefresh }) => {
   const [form] = Form.useForm();
@@ -17,7 +18,7 @@ const AdminPromotionForm = ({ onRefresh }) => {
           'Content-Type': 'application/json',
         },
       };
-      await axios.post('/api/admin/make-admin', values, config);
+      await axios.post(`${ENV_BASE_URL}/api/admin/make-admin`, values, config);
       message.success('User promoted to admin successfully');
       form.resetFields();
       if (onRefresh) onRefresh();

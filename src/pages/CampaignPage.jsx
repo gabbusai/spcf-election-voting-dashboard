@@ -54,7 +54,7 @@ function CampaignPage() {
   const handleApprove = async (postId) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`/api/admin/posts/${postId}/approve`, {}, config);
+      await axios.put(`${ENV_BASE_URL}/api/admin/posts/${postId}/approve`, {}, config);
       message.success('Post approved successfully');
       fetchNextPage();
     } catch (err) {
@@ -65,7 +65,7 @@ function CampaignPage() {
   const handleDecline = async (postId) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`/api/posts/${postId}/decline`, {}, config);
+      await axios.put(`${ENV_BASE_URL}/api/posts/${postId}/decline`, {}, config);
       message.success('Post declined successfully');
       fetchNextPage();
     } catch (err) {

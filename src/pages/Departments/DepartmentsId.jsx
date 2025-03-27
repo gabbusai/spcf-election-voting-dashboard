@@ -4,6 +4,8 @@ import { Link, useParams } from 'react-router-dom';
 import { useFetchDepartmenyById } from '../../utils/queries';
 import { Table, Button, Modal, message } from 'antd';
 import axios from 'axios';
+import { BASE_URL } from '../../utils/api';
+import { ENV_BASE_URL } from '../../../DummyENV';
 
 function DepartmentsId() {
   const { user, token } = useAuthContext();
@@ -72,7 +74,7 @@ function DepartmentsId() {
       async onOk() {
         try {
           const config = { headers: { Authorization: `Bearer ${token}` } };
-          await axios.delete(`/api/departments/${id}`, config);
+          await axios.delete(`${ENV_BASE_URL}/api/departments/${id}`, config);
           message.success('Department deleted successfully');
           // Optionally redirect after deletion
           window.location.href = '/departments-roles'; // Adjust route as needed
@@ -87,7 +89,7 @@ function DepartmentsId() {
   const handleModifySubmit = async (values) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`/api/admin/departments/${id}`, { name: values.name }, config);
+      await axios.put(`${ENV_BASE_URL}/api/admin/departments/${id}`, { name: values.name }, config);
       message.success('Department updated successfully');
       setIsModifyModalOpen(false);
       // Refetch or update state manually if needed

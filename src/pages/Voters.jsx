@@ -7,6 +7,7 @@ import EditStudentModal from './Students/EditStudentModal';
 import GenerateTokenModal from './Students/GenerateTokenModal'; 
 import axios from 'axios';
 import { importStudentCSV } from '../utils/api';
+import { ENV_BASE_URL } from '../../DummyENV';
 
 function Voters() {
   const { token } = useAuthContext();
@@ -68,7 +69,7 @@ function Voters() {
       async onOk() {
         try {
           const config = { headers: { Authorization: `Bearer ${token}` } };
-          await axios.delete(`/api/admin/students/${studentId}`, config);
+          await axios.delete(`${ENV_BASE_URL}/api/admin/students/${studentId}`, config);
           message.success('Student deleted successfully');
           refetch();
         } catch (error) {

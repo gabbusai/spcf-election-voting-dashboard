@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import axios from 'axios';
 import { useAuthContext } from '../../utils/AuthContext';
+import { ENV_BASE_URL } from '../../../DummyENV';
 
 const { TextArea } = Input;
 
@@ -34,10 +35,10 @@ const PartylistForm = ({ onClose, onRefresh, partylist = null }) => {
       };
 
       if (partylist) {
-        await axios.put(`/api/admin/partylist/${partylist.id}`, values, config);
+        await axios.put(`${ENV_BASE_URL}/api/admin/partylist/${partylist.id}`, values, config);
         message.success('Party list updated successfully');
       } else {
-        await axios.post('/api/partylist-make', values, config);
+        await axios.post(`${ENV_BASE_URL}/api/partylist-make`, values, config);
         message.success('Party list created successfully');
       }
       onRefresh();

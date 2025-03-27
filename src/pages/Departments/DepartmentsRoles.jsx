@@ -4,6 +4,7 @@ import { Table, Button, Modal, message, Form, Input } from 'antd';
 import { useAuthContext } from '../../utils/AuthContext';
 import { useFetchDepartmentsList } from '../../utils/queries';
 import axios from 'axios';
+import { ENV_BASE_URL } from '../../../DummyENV';
 
 function DepartmentsRoles() {
   const { token } = useAuthContext();
@@ -92,7 +93,7 @@ function DepartmentsRoles() {
   const handleAddDepartment = async (values) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.post('/api/admin/departments', values, config);
+      await axios.post(`${ENV_BASE_URL}/api/admin/departments`, values, config);
       message.success('Department added successfully');
       form.resetFields();
       setIsAddModalOpen(false);
