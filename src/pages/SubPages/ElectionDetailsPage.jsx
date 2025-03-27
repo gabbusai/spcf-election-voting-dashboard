@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom'; // Added useNavigate
 import { useFetchElectionById } from '../../utils/queries';
 import { useAuthContext } from '../../utils/AuthContext';
 import axios from 'axios';
 import { 
-  Calendar, 
-  Clock, 
-  Users, 
-  User, 
-  CheckCircle, 
-  XCircle, 
-  RefreshCw,
-  Edit // New icon for edit button
+  Calendar, Clock, Users, User, CheckCircle, XCircle, RefreshCw, Edit, Trash2 // Added Trash2 icon
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ENV_BASE_URL } from '../../../DummyENV';
@@ -19,12 +12,12 @@ import { ENV_BASE_URL } from '../../../DummyENV';
 function ElectionDetailsPage() {
   const { user, token } = useAuthContext();
   const { id } = useParams();
+  const navigate = useNavigate(); // For redirection after delete
   const { data: election, isLoading, isError, refetch } = useFetchElectionById(token, id);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
-  const [formData, setFormData] = useState({}); // State for form inputs
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({});
 
-  // Handle status update with loading state
   const handleStatusChange = async (newStatus) => {
     setIsUpdating(true);
     try {
@@ -42,14 +35,12 @@ function ElectionDetailsPage() {
     }
   };
 
-  // Toggle between 'ongoing' and 'completed'
   const handleToggleStatus = () => {
     const currentStatus = election.election.status;
     const newStatus = currentStatus === 'ongoing' ? 'completed' : 'ongoing';
     handleStatusChange(newStatus);
   };
 
-  // Open modal with current election data
   const openEditModal = () => {
     setFormData({
       election_name: election.election.election_name,
@@ -62,27 +53,48 @@ function ElectionDetailsPage() {
     setIsModalOpen(true);
   };
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submit edited election data
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setIsUpdating(true);
     try {
+      const payload = { election_id: id, ...formData };
       const response = await axios.put(
         `${ENV_BASE_URL}/api/admin/election/edit`,
-        { election_id: id, ...formData },
+        payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      await refetch(); // Refresh election data
+      await refetch();
       toast.success(response.data.message);
-      setIsModalOpen(false); // Close modal on success
+      setIsModalOpen(false);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update election');
+      const errorMsg = error.response?.data?.message || error.response?.data?.errors || 'Failed to update election';
+      toast.error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // New delete function
+  const handleDeleteElection = async () => {
+    if (!window.confirm('Are you sure you want to delete this election? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const response = await axios.delete(
+        `${ENV_BASE_URL}/api/admin/election/delete/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(response.data.message);
+      navigate('/elections/all'); // Redirect to elections list or another page
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete election');
     } finally {
       setIsUpdating(false);
     }
@@ -119,7 +131,6 @@ function ElectionDetailsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* Election Header */}
         <div className="bg-white shadow-lg rounded-lg p-6 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">{election.election_name}</h1>
@@ -127,10 +138,8 @@ function ElectionDetailsPage() {
               {election.election.status.charAt(0).toUpperCase() + election.election.status.slice(1)}
             </div>
           </div>
-
-          {/* Buttons (Admin Only) */}
           {isAdmin && (
-            <div className="flex space-x-3">
+            <div className="flex space-x-3 flex-wrap gap-y-3"> {/* Added flex-wrap and gap-y for better spacing */}
               {canStart && (
                 <button
                   onClick={() => handleStatusChange('ongoing')}
@@ -167,13 +176,19 @@ function ElectionDetailsPage() {
                 <Edit className="w-5 h-5" />
                 <span>Edit Election</span>
               </button>
+              <button
+                onClick={handleDeleteElection}
+                disabled={isUpdating}
+                className="btn btn-danger flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"
+              >
+                <Trash2 className="w-5 h-5" />
+                <span>Delete Election</span>
+              </button>
             </div>
           )}
         </div>
 
-        {/* Rest of the page remains unchanged */}
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Election Timeline */}
           <div className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
               <Calendar className="mr-2 text-blue-500" /> Election Timeline
@@ -195,7 +210,6 @@ function ElectionDetailsPage() {
               ))}
             </div>
           </div>
-          {/* Additional Election Info */}
           <div className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
               <Users className="mr-2 text-green-500" /> Election Details
@@ -232,7 +246,6 @@ function ElectionDetailsPage() {
             </div>
           </div>
         </div>
-        {/* Positions and Candidates */}
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-white shadow-lg rounded-lg p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
@@ -279,7 +292,6 @@ function ElectionDetailsPage() {
         </div>
       </div>
 
-      {/* Edit Election Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-lg">
@@ -344,7 +356,7 @@ function ElectionDetailsPage() {
                   onChange={handleInputChange}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="pending">Pending</option>
+                  <option value="upcoming">Upcoming</option>
                   <option value="ongoing">Ongoing</option>
                   <option value="completed">Completed</option>
                 </select>
