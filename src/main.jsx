@@ -23,6 +23,7 @@ import ElectionsReport from './pages/Elections/ElectionsReport.jsx'
 import ElectionsResultsId from './pages/Elections/ElectionsResultsId.jsx'
 import ElectionsReportsList from './pages/Elections/ElectinReportsList.jsx'
 import Feedbacks from './pages/Feedbacks/Feedbacks.jsx'
+import ElectionVoterStatus from './pages/Elections/ElectionVoterStatus.jsx'
 const queryClient = new QueryClient({
   defaultOptions: {
       queries: {
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
       {path: '/elections/reports-list', element :<ElectionsReportsList/> },
       {path: '/elections/reports/:id', element :<ElectionsReport/> },
       {path: '/elections/results/:id', element :<ElectionsResultsId/> },
+      {path: '/elections/voters/:id', element :<ElectionVoterStatus/> },
 
       { path: '/positions-candidates', element: <PositionsCandidates /> },
 

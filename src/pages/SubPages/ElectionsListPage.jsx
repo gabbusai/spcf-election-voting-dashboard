@@ -40,12 +40,19 @@ function ElectionsListPage() {
               <p className="text-gray-600">
                 Election End: {new Date(election.election_end_date).toLocaleString()}
               </p>
-              <div className="mt-4">
+              <div className="mt-4 w-full grid grid-cols-2 place-items-center">
                 <Link
                   to={`/elections/${election.id}`}
-                  className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-300"
+                  className="w-[70%] h-18 text-center bg-indigo-600 text-white py-2 px-0 rounded-lg hover:bg-indigo-700 transition duration-300"
                 >
-                  View Election Details
+                  Details
+                </Link>
+
+                <Link
+                  to={`/elections/voters/${election.id}`}
+                  className="w-[70%] h-18 text-center bg-indigo-600 text-white py-2 px-0 rounded-lg hover:bg-indigo-700 transition duration-300"
+                >
+                  Voter Status
                 </Link>
               </div>
             </div>

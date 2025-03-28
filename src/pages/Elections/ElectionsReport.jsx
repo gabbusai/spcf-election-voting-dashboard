@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthContext } from '../../utils/AuthContext';
 import { useParams } from 'react-router-dom';
-import { useFetchTurnouts } from '../../utils/queries';
+import { useFetchElectionVoters, useFetchTurnouts } from '../../utils/queries';
 import { Table, Input, Button, Space, Typography, Card, Statistic } from 'antd';
 import { SearchOutlined, PieChartOutlined } from '@ant-design/icons';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
@@ -24,7 +24,7 @@ function ElectionsReport() {
         error,
         refetch,
     } = useFetchTurnouts(token, id, 15, search);
-
+    
     // Handle search input
     const handleSearch = (value) => {
         setSearch(value);

@@ -227,7 +227,7 @@ export const getDepartmentById = async (token, id) => {
 //get paginated posts
 export const fetchPaginatedPosts = async (token, page, perPage = 2) => {
     if (page < 1) {
-      page = 1;
+        page = 1;
     }
     const response = await axiosInstance.get(`/api/admin/posts/all?page=${page}&per_page=${perPage}`, {
         headers: {
@@ -235,15 +235,15 @@ export const fetchPaginatedPosts = async (token, page, perPage = 2) => {
         }
     });
     return response.data;
-  };
+};
 
 
 //get paginated users
-export const fetchPaginatedUsers = async (token, search = "",page, perPage = 15) => {
+export const fetchPaginatedUsers = async (token, search = "", page, perPage = 15) => {
     if (page < 1) {
         page = 1;
     }
-    const response = await axiosInstance.get(`/api/admin/students/all?search=${search}&page=${page}&per_page=${perPage}`,{
+    const response = await axiosInstance.get(`/api/admin/students/all?search=${search}&page=${page}&per_page=${perPage}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -253,17 +253,17 @@ export const fetchPaginatedUsers = async (token, search = "",page, perPage = 15)
 
 //make student 
 export const useMakeStudent = async (token, formData) => {
-        try {
-            const response = await axiosInstance.post('/api/admin/students/make', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            return response.data;
-        } catch (error) {
-            console.error("Error logging out", error);
-            throw error.response ? error.response.data : error;
-        }
+    try {
+        const response = await axiosInstance.post('/api/admin/students/make', formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error logging out", error);
+        throw error.response ? error.response.data : error;
+    }
 };
 
 //unused
@@ -320,8 +320,8 @@ export const useDeleteStudent = async (token, id) => {
 //register -> provide student_id, name, department, email, contact, -> unique id
 
 
-export const getAdminElectionResults = async(token, id) => {
-    try{
+export const getAdminElectionResults = async (token, id) => {
+    try {
         const response = await axiosInstance.get(`/api/admin/elections/${id}/results`, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -329,19 +329,34 @@ export const getAdminElectionResults = async(token, id) => {
         });
         return response.data;
     }
-    catch (error){
-        console.error("Error logging out", error);
+    catch (error) {
+        console.error("Error showing results", error);
+        throw error.response ? error.response.data : error;
+    }
+}
+
+export const getElectionStatistics = async (token, id) => {
+    try {
+        const response = await axiosInstance.get(`/api/admin/elections/${id}/statistics`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        }); return response.data;
+
+    }
+    catch (error) {
+        console.error("Error showing statistics", error);
         throw error.response ? error.response.data : error;
     }
 }
 
 //paginated turnouts 
-export const fetchPaginatedTurnouts = async (token, id,  search = "",page, perPage = 15) => {
+export const fetchPaginatedTurnouts = async (token, id, search = "", page, perPage = 15) => {
     console.log('reached turnout')
     if (page < 1) {
         page = 1;
     }
-    const response = await axiosInstance.get(`/api/admin/elections/${id}/turnout?search=${search}&page=${page}&per_page=${perPage}`,{
+    const response = await axiosInstance.get(`/api/admin/elections/${id}/turnout?search=${search}&page=${page}&per_page=${perPage}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -351,7 +366,7 @@ export const fetchPaginatedTurnouts = async (token, id,  search = "",page, perPa
 
 
 export const fetchCountAllDepartments = async (token) => {
-    try { 
+    try {
         const response = await axiosInstance.get(`/api/admin/count/departments`, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -359,23 +374,72 @@ export const fetchCountAllDepartments = async (token) => {
         });
         return response.data.data;
     }
-    catch (error){
+    catch (error) {
         console.error("Error logging out", error);
         throw error.response ? error.response.data : error;
-        }
+    }
 
 }
 
 //paginated turnouts 
-export const fetchPaginatedFeedbacks = async (token, id,  search = "",page, perPage = 15) => {
+export const fetchPaginatedFeedbacks = async (token, id, search = "", page, perPage = 15) => {
     console.log('reached turnout')
     if (page < 1) {
         page = 1;
     }
-    const response = await axiosInstance.get(`/api/admin/feedbacks/all?search=${search}&page=${page}&per_page=${perPage}`,{
+    const response = await axiosInstance.get(`/api/admin/feedbacks/all?search=${search}&page=${page}&per_page=${perPage}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
     });
     return response.data;
+}
+
+//fetch voter status
+export const fetchElectionVoterStatus = async (
+    token,
+    id,
+    search = "",
+    page = 1,
+    perPage = 15,
+    votingStatus = null,
+    departmentId = null,
+    sortBy = 'id',
+    sortDirection = 'asc'
+) => {
+
+    try {    // Ensure page is at least 1
+        if (page < 1) {
+            page = 1;
+        }
+
+        console.log('reached fetching')
+
+        // Construct query parameters
+        const params = new URLSearchParams({
+            search,
+            page,
+            per_page: perPage,
+            sort_by: sortBy,
+            sort_direction: sortDirection
+        });
+        // Add optional filters if provided
+        if (votingStatus !== null) {
+            params.append('voting_status', votingStatus);
+        }
+
+        if (departmentId !== null) {
+            params.append('department_id', departmentId);
+        }
+        // Make the API call
+        const response = await axiosInstance.get(`/api/admin/elections/${id}/voters?${params.toString()}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error", error);
+        throw error.response ? error.response.data : error;
+    }
 }

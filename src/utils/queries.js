@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
-import { fetchCountAllDepartments, fetchPaginatedFeedbacks, fetchPaginatedPosts, fetchPaginatedTurnouts, fetchPaginatedUsers, getAdminElectionResults, getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartmentById, getDepartments, getDepartmentsList, getElectionById } from "./api";
+import { fetchCountAllDepartments, fetchElectionVoterStatus, fetchPaginatedFeedbacks, fetchPaginatedPosts, fetchPaginatedTurnouts, fetchPaginatedUsers, getAdminElectionResults, getAllCandidates, getAllElections, getAllPartylists, getAllPositions, getAllRegistered, getDepartmentById, getDepartments, getDepartmentsList, getElectionById, getElectionStatistics } from "./api";
 
 
 export const useFetchDepartments = () => {
@@ -159,3 +159,57 @@ export const useFetchElectionResults = (token, id) => {
         queryFn: () => getAdminElectionResults(token, id),
     })
 }
+
+//get election statistics
+export const useFetchElectionStatistics = (token, id) =>{
+    return useQuery({
+        queryKey: ['electionStatistics', id],
+        queryFn: () => getElectionStatistics(token, id),
+    })
+}
+
+
+
+//fetch paginated voter status
+export const useFetchElectionVoters = (
+    token, 
+    id, 
+    perPage = 15, 
+    search = "", 
+    votingStatus = null, 
+    departmentId = null, 
+    sortBy = 'id', 
+    sortDirection = 'asc'
+) => {
+    return useInfiniteQuery({
+        queryKey: [
+            'election-voters', 
+            id, 
+            perPage, 
+            search, 
+            votingStatus, 
+            departmentId, 
+            sortBy, 
+            sortDirection
+        ],
+        queryFn: ({pageParam = 1}) => fetchElectionVoterStatus(
+            token, 
+            id, 
+            search, 
+            pageParam, 
+            perPage, 
+            votingStatus, 
+            departmentId, 
+            sortBy, 
+            sortDirection
+        ),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) => {
+            const pagination = lastPage.pagination;
+            if (pagination.current_page < pagination.total_pages) {
+                return pagination.current_page + 1;
+            }
+            return undefined;
+        }
+    });
+};
