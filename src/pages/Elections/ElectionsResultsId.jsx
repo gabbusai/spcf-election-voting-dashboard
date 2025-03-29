@@ -41,32 +41,35 @@ const { Title, Text } = Typography;
 // Helper function to calculate percentage, winners, and abstains
 const processPositionResults = (candidates, votesCast) => {
   const totalVotes = candidates.reduce((sum, candidate) => sum + candidate.votes, 0);
+  const abstainCount = votesCast - totalVotes;
   
-  // Calculate percentages
+  // For pie chart and bar chart, include abstains in total for percentage calculation
+  const totalWithAbstains = totalVotes + (abstainCount > 0 ? abstainCount : 0);
+  
+  // Calculate percentages based on total votes including abstains
   const candidatesWithPercentage = candidates.map(candidate => ({
     ...candidate,
-    percentage: totalVotes > 0 
-      ? ((candidate.votes / totalVotes) * 100).toFixed(2) 
+    percentage: totalWithAbstains > 0 
+      ? ((candidate.votes / totalWithAbstains) * 100).toFixed(2) 
       : '0.00'
   }));
 
   // Sort candidates by votes in descending order
   const sortedCandidates = candidatesWithPercentage.sort((a, b) => b.votes - a.votes);
 
-  // Determine winners (handle ties)
+  // Determine winners (handle ties) - winners still based on most votes among candidates
   const maxVotes = sortedCandidates[0]?.votes || 0;
   const winners = sortedCandidates.filter(candidate => candidate.votes === maxVotes);
 
-  // Calculate abstains (votes_cast minus total votes for this position)
-  const abstainCount = votesCast - totalVotes;
-  const abstainPercentage = votesCast > 0 
-    ? ((abstainCount / votesCast) * 100).toFixed(2) 
+  // Calculate abstain percentage based on total including abstains
+  const abstainPercentage = totalWithAbstains > 0 
+    ? ((abstainCount / totalWithAbstains) * 100).toFixed(2) 
     : '0.00';
 
   // Create abstain object for pie chart
   const abstainObject = {
     name: 'Abstains',
-    votes: abstainCount >= 0 ? abstainCount : 0,
+    votes: abstainCount > 0 ? abstainCount : 0,
     percentage: abstainPercentage,
     isAbstain: true // Flag to identify abstain entries
   };
@@ -76,23 +79,36 @@ const processPositionResults = (candidates, votesCast) => {
     name: candidate.name,
     votes: candidate.votes,
     percentage: candidate.percentage
-  })).concat({
-    name: 'Abstains',
-    votes: abstainCount >= 0 ? abstainCount : 0,
-    percentage: abstainPercentage
-  });
+  }));
+  
+  // Only add abstains to bar chart if positive
+  if (abstainCount > 0) {
+    barChartData.push({
+      name: 'Abstains',
+      votes: abstainCount,
+      percentage: abstainPercentage
+    });
+  }
 
   // Prepare pie chart data (include candidates + abstain)
-  const pieChartData = [...sortedCandidates, abstainObject];
+  const pieChartData = [...sortedCandidates];
+  if (abstainCount > 0) {
+    pieChartData.push(abstainObject);
+  }
+
+  // For verification: sum of all percentages should be close to 100%
+  const totalPercentage = pieChartData.reduce((sum, item) => sum + parseFloat(item.percentage), 0);
 
   return {
     candidates: sortedCandidates,
     winners,
     totalVotes,
-    abstains: abstainCount >= 0 ? abstainCount : 0,
+    totalWithAbstains,
+    abstains: abstainCount > 0 ? abstainCount : 0,
     abstainPercentage,
     barChartData,
-    pieChartData
+    pieChartData,
+    totalPercentage: totalPercentage.toFixed(2) // For debugging
   };
 };
 
@@ -204,7 +220,17 @@ function ElectionsResultsId() {
             {processedResults.map((position) => (
                 <Card 
                     key={position.position_id} 
-                    title={position.position_name}
+                    title={
+                        <Row>
+                            <Col span={18}>{position.position_name}</Col>
+                            <Col span={6}>
+                                <Text type="secondary">
+                                    Total votes: {position.totalWithAbstains} 
+                                    {position.abstains > 0 ? ` (including ${position.abstains} abstains)` : ''}
+                                </Text>
+                            </Col>
+                        </Row>
+                    }
                     style={{ marginBottom: 24 }}
                 >
                     <Row gutter={16}>
@@ -221,7 +247,13 @@ function ElectionsResultsId() {
                                         }}
                                     />
                                     <Legend />
-                                    <Bar dataKey="votes" fill="#1890ff" name="Votes" />
+                                    <Bar 
+                                        dataKey="votes" 
+                                        name="Votes" 
+                                        fill="#1890ff"
+                                        // Color abstains differently
+                                        //fill={(entry) => entry.name === 'Abstains' ? ABSTAIN_COLOR : '#1890ff'} 
+                                    />
                                 </BarChart>
                             </ResponsiveContainer>
                         </Col>
@@ -262,10 +294,12 @@ function ElectionsResultsId() {
                         <Col span={7}>
                             <Card 
                                 type="inner" 
-                                title="Candidates" 
-                                extra={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
+                                title="Results" 
+                                extra={position.totalPercentage === '100.00' ? 
+                                    <Text type="success">100% Total</Text> : 
+                                    <Text>{position.totalPercentage}% Total</Text>}
                             >
-                                {position.totalVotes === 0 ? (
+                                {position.totalVotes === 0 && position.abstains === 0 ? (
                                     <Alert 
                                         message="No Votes" 
                                         description="No votes were received for this position" 
@@ -297,20 +331,22 @@ function ElectionsResultsId() {
                                         ))}
                                         
                                         {/* Add Abstains Card */}
-                                        <Card 
-                                            type="inner"
-                                            title="Abstains"
-                                            style={{ backgroundColor: '#f5f5f5' }}
-                                        >
-                                            <Row>
-                                                <Col span={12}>
-                                                    <Text strong>{position.abstains} abstain{position.abstains !== 1 ? 's' : ''}</Text>
-                                                </Col>
-                                                <Col span={12}>
-                                                    <Text type="secondary">{position.abstainPercentage}%</Text>
-                                                </Col>
-                                            </Row>
-                                        </Card>
+                                        {position.abstains > 0 && (
+                                            <Card 
+                                                type="inner"
+                                                title="Abstains"
+                                                style={{ backgroundColor: '#f5f5f5' }}
+                                            >
+                                                <Row>
+                                                    <Col span={12}>
+                                                        <Text strong>{position.abstains} abstain{position.abstains !== 1 ? 's' : ''}</Text>
+                                                    </Col>
+                                                    <Col span={12}>
+                                                        <Text type="secondary">{position.abstainPercentage}%</Text>
+                                                    </Col>
+                                                </Row>
+                                            </Card>
+                                        )}
                                     </Space>
                                 )}
                             </Card>
@@ -332,7 +368,8 @@ function ElectionsResultsId() {
                         data={processedResults.map(position => ({
                             name: position.position_name,
                             abstains: position.abstains,
-                            abstainPercentage: position.abstainPercentage
+                            percentage: position.abstainPercentage,
+                            totalVotes: position.totalWithAbstains
                         }))}
                     >
                         <CartesianGrid strokeDasharray="3 3" />
@@ -341,7 +378,12 @@ function ElectionsResultsId() {
                         <Tooltip 
                             formatter={(value, name, props) => {
                                 const entry = props.payload;
-                                return [`${value} abstains (${entry.abstainPercentage}%)`, name];
+                                return [
+                                    name === "abstains" 
+                                        ? `${value} abstains (${entry.percentage}%)` 
+                                        : value,
+                                    name
+                                ];
                             }}
                         />
                         <Legend />
@@ -352,13 +394,17 @@ function ElectionsResultsId() {
                 <Space direction="vertical" style={{ width: '100%', marginTop: 16 }}>
                     {processedResults.map(position => (
                         <Row key={position.position_id} gutter={16}>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <Text strong>{position.position_name}</Text>
                             </Col>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <Text>
-                                    {position.abstains} abstain{position.abstains !== 1 ? 's' : ''} (
-                                    {position.abstainPercentage}%)
+                                    {position.abstains} abstain{position.abstains !== 1 ? 's' : ''}
+                                </Text>
+                            </Col>
+                            <Col span={8}>
+                                <Text>
+                                    {position.abstainPercentage}% of total votes
                                 </Text>
                             </Col>
                         </Row>
