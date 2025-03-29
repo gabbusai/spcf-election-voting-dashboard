@@ -58,18 +58,47 @@ const processPositionResults = (candidates, votesCast) => {
   const winners = sortedCandidates.filter(candidate => candidate.votes === maxVotes);
 
   // Calculate abstains (votes_cast minus total votes for this position)
-  const abstains = votesCast - totalVotes;
+  const abstainCount = votesCast - totalVotes;
+  const abstainPercentage = votesCast > 0 
+    ? ((abstainCount / votesCast) * 100).toFixed(2) 
+    : '0.00';
+
+  // Create abstain object for pie chart
+  const abstainObject = {
+    name: 'Abstains',
+    votes: abstainCount >= 0 ? abstainCount : 0,
+    percentage: abstainPercentage,
+    isAbstain: true // Flag to identify abstain entries
+  };
+
+  // Prepare bar chart data (candidates + abstains)
+  const barChartData = sortedCandidates.map(candidate => ({
+    name: candidate.name,
+    votes: candidate.votes,
+    percentage: candidate.percentage
+  })).concat({
+    name: 'Abstains',
+    votes: abstainCount >= 0 ? abstainCount : 0,
+    percentage: abstainPercentage
+  });
+
+  // Prepare pie chart data (include candidates + abstain)
+  const pieChartData = [...sortedCandidates, abstainObject];
 
   return {
     candidates: sortedCandidates,
     winners,
     totalVotes,
-    abstains: abstains >= 0 ? abstains : 0 // Ensure no negative values
+    abstains: abstainCount >= 0 ? abstainCount : 0,
+    abstainPercentage,
+    barChartData,
+    pieChartData
   };
 };
 
 // Custom colors for pie chart
-const COLORS = ['#1890ff', '#52c41a', '#faad14', '#f5222d', '#722ed1'];
+const COLORS = ['#1890ff', '#52c41a', '#faad14', '#f5222d', '#722ed1', '#eb2f96'];
+const ABSTAIN_COLOR = '#8c8c8c'; // Gray color for abstains
 
 function ElectionsResultsId() {
     const { user, token } = useAuthContext();
@@ -181,18 +210,18 @@ function ElectionsResultsId() {
                     <Row gutter={16}>
                         <Col span={10}>
                             <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={position.candidates}>
+                                <BarChart data={position.barChartData}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="name" />
                                     <YAxis />
                                     <Tooltip 
                                         formatter={(value, name, props) => {
-                                            const candidate = props.payload;
-                                            return [`${value} votes (${candidate.percentage}%)`, name];
+                                            const entry = props.payload;
+                                            return [`${value} votes (${entry.percentage}%)`, name];
                                         }}
                                     />
                                     <Legend />
-                                    <Bar dataKey="votes" fill="#1890ff" />
+                                    <Bar dataKey="votes" fill="#1890ff" name="Votes" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </Col>
@@ -200,7 +229,7 @@ function ElectionsResultsId() {
                             <ResponsiveContainer width="100%" height={300}>
                                 <PieChart>
                                     <Pie
-                                        data={position.candidates}
+                                        data={position.pieChartData}
                                         cx="50%"
                                         cy="50%"
                                         labelLine={false}
@@ -208,20 +237,23 @@ function ElectionsResultsId() {
                                         fill="#8884d8"
                                         dataKey="votes"
                                     >
-                                        {position.candidates.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        {position.pieChartData.map((entry, index) => (
+                                            <Cell 
+                                                key={`cell-${index}`} 
+                                                fill={entry.isAbstain ? ABSTAIN_COLOR : COLORS[index % COLORS.length]} 
+                                            />
                                         ))}
                                     </Pie>
                                     <Tooltip 
                                         formatter={(value, name, props) => {
-                                            const candidate = props.payload;
-                                            return [`${value} votes (${candidate.percentage}%)`, name];
+                                            const item = props.payload;
+                                            return [`${value} votes (${item.percentage}%)`, item.name];
                                         }}
                                     />
                                     <Legend 
                                         formatter={(value, entry) => {
-                                            const candidate = entry.payload;
-                                            return `${candidate.name} (${candidate.percentage}%)`;
+                                            const item = entry.payload;
+                                            return `${item.name} (${item.percentage}%)`;
                                         }}
                                     />
                                 </PieChart>
@@ -263,6 +295,22 @@ function ElectionsResultsId() {
                                                 <Text type="secondary">({candidate.partylist})</Text>
                                             </Card>
                                         ))}
+                                        
+                                        {/* Add Abstains Card */}
+                                        <Card 
+                                            type="inner"
+                                            title="Abstains"
+                                            style={{ backgroundColor: '#f5f5f5' }}
+                                        >
+                                            <Row>
+                                                <Col span={12}>
+                                                    <Text strong>{position.abstains} abstain{position.abstains !== 1 ? 's' : ''}</Text>
+                                                </Col>
+                                                <Col span={12}>
+                                                    <Text type="secondary">{position.abstainPercentage}%</Text>
+                                                </Col>
+                                            </Row>
+                                        </Card>
                                     </Space>
                                 )}
                             </Card>
@@ -271,24 +319,37 @@ function ElectionsResultsId() {
                 </Card>
             ))}
 
-
-
-            {electionStat && <ElectionStatistics electionStat={electionStat} />}
-
-
-        {/* Abstains by Position Section */}
-        <div className="mt-10"></div>
+            {/* Abstains by Position Section */}
             <Divider orientation="left">
                 <Title level={3}>
                     <BarChartOutlined style={{ marginRight: 12, color: '#1890ff' }} />
                     Abstains by Position
                 </Title>
             </Divider>
-
-
-
             <Card>
-                <Space direction="vertical" style={{ width: '100%' }}>
+                <ResponsiveContainer width="100%" height={300}>
+                    <BarChart 
+                        data={processedResults.map(position => ({
+                            name: position.position_name,
+                            abstains: position.abstains,
+                            abstainPercentage: position.abstainPercentage
+                        }))}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip 
+                            formatter={(value, name, props) => {
+                                const entry = props.payload;
+                                return [`${value} abstains (${entry.abstainPercentage}%)`, name];
+                            }}
+                        />
+                        <Legend />
+                        <Bar dataKey="abstains" fill="#faad14" name="Abstains" />
+                    </BarChart>
+                </ResponsiveContainer>
+                
+                <Space direction="vertical" style={{ width: '100%', marginTop: 16 }}>
                     {processedResults.map(position => (
                         <Row key={position.position_id} gutter={16}>
                             <Col span={12}>
@@ -296,14 +357,16 @@ function ElectionsResultsId() {
                             </Col>
                             <Col span={12}>
                                 <Text>
-                                    {position.abstains} abstain{position.abstains !== 1 ? 's' : ''}
-                                    
+                                    {position.abstains} abstain{position.abstains !== 1 ? 's' : ''} (
+                                    {position.abstainPercentage}%)
                                 </Text>
                             </Col>
                         </Row>
                     ))}
                 </Space>
             </Card>
+
+            {electionStat && <ElectionStatistics electionStat={electionStat} />}
         </div>
     );
 }
