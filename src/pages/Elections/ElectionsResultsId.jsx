@@ -14,7 +14,8 @@ import {
   TrophyOutlined, 
   PieChartOutlined, 
   UserOutlined, 
-  CheckCircleOutlined 
+  CheckCircleOutlined,
+  BarChartOutlined
 } from '@ant-design/icons';
 import { 
   BarChart, 
@@ -37,8 +38,8 @@ import ElectionStatistics from '../../components/ElectionStatistics';
 
 const { Title, Text } = Typography;
 
-// Helper function to calculate percentage and determine winners
-const processPositionResults = (candidates) => {
+// Helper function to calculate percentage, winners, and abstains
+const processPositionResults = (candidates, votesCast) => {
   const totalVotes = candidates.reduce((sum, candidate) => sum + candidate.votes, 0);
   
   // Calculate percentages
@@ -56,10 +57,14 @@ const processPositionResults = (candidates) => {
   const maxVotes = sortedCandidates[0]?.votes || 0;
   const winners = sortedCandidates.filter(candidate => candidate.votes === maxVotes);
 
+  // Calculate abstains (votes_cast minus total votes for this position)
+  const abstains = votesCast - totalVotes;
+
   return {
     candidates: sortedCandidates,
     winners,
-    totalVotes
+    totalVotes,
+    abstains: abstains >= 0 ? abstains : 0 // Ensure no negative values
   };
 };
 
@@ -70,10 +75,9 @@ function ElectionsResultsId() {
     const { user, token } = useAuthContext();
     const { id } = useParams();
     const { data, isLoading, isError, refetch } = useFetchElectionResults(token, id);
-    const {data: electionStat, isError: electionStatError, isLoading: electionStatLoading, refetch: electionStatRefetch}
-    = useFetchElectionStatistics(token, id);
+    const { data: electionStat, isError: electionStatError, isLoading: electionStatLoading, refetch: electionStatRefetch } 
+      = useFetchElectionStatistics(token, id);
 
-    
     if (isLoading || electionStatLoading) return (
         <Card>
             <Alert 
@@ -112,10 +116,10 @@ function ElectionsResultsId() {
 
     const { election, results } = data;
 
-    // Process each position's results
+    // Process each position's results, passing votes_cast for abstain calculation
     const processedResults = results.map(position => ({
         ...position,
-        ...processPositionResults(position.candidates)
+        ...processPositionResults(position.candidates, election.votes_cast)
     }));
 
     return (
@@ -267,7 +271,39 @@ function ElectionsResultsId() {
                 </Card>
             ))}
 
+
+
             {electionStat && <ElectionStatistics electionStat={electionStat} />}
+
+
+        {/* Abstains by Position Section */}
+        <div className="mt-10"></div>
+            <Divider orientation="left">
+                <Title level={3}>
+                    <BarChartOutlined style={{ marginRight: 12, color: '#1890ff' }} />
+                    Abstains by Position
+                </Title>
+            </Divider>
+
+
+
+            <Card>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                    {processedResults.map(position => (
+                        <Row key={position.position_id} gutter={16}>
+                            <Col span={12}>
+                                <Text strong>{position.position_name}</Text>
+                            </Col>
+                            <Col span={12}>
+                                <Text>
+                                    {position.abstains} abstain{position.abstains !== 1 ? 's' : ''}
+                                    
+                                </Text>
+                            </Col>
+                        </Row>
+                    ))}
+                </Space>
+            </Card>
         </div>
     );
 }
